@@ -10,6 +10,7 @@ import json
 import logging
 import numpy as np
 import random
+import sys
 
 from concurrent.futures import ThreadPoolExecutor, wait
 
@@ -51,7 +52,7 @@ class DataGenerator(object):
             max_freq=self.max_freq)
 
     def load_metadata_from_desc_file(self, desc_file, partition='train',
-                                     max_duration=10.0,):
+                                     max_duration=10,):
         """ Read metadata from the description file
             (possibly takes long, depending on the filesize)
         Params:
@@ -67,18 +68,24 @@ class DataGenerator(object):
         with open(desc_file) as json_line_file:
             for line_num, json_line in enumerate(json_line_file):
                 try:
-                    spec = json.loads(json_line)
-                    if float(spec['duration']) > max_duration:
+		    
+                    #spec = json.loads(json_line)
+		    
+		    spec = json_line.split(',')
+		    if spec[0] == 'key' or spec == ['']:
+			continue
+
+                    if float(spec[1]) > max_duration*100000:
                         continue
-                    audio_paths.append(spec['key'])
-                    durations.append(float(spec['duration']))
-                    texts.append(spec['text'])
+		    
+                    audio_paths.append(spec[0])
+                    durations.append(float(spec[1]))
+                    texts.append(spec[2].replace('\n',''))
                 except Exception as e:
                     # Change to (KeyError, ValueError) or
                     # (KeyError,json.decoder.JSONDecodeError), depending on
                     # json module version
-                    logger.warn('Error reading line #{}: {}'
-                                .format(line_num, json_line))
+                    logger.warn('Error reading line #{}: {}'.format(line_num, json_line))
                     logger.warn(str(e))
 
         if partition == 'train':

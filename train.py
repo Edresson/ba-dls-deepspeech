@@ -16,7 +16,7 @@ from utils import configure_logging, save_model
 logger = logging.getLogger(__name__)
 
 
-def validation(model, val_fn, datagen, mb_size=16):
+def validation(model, val_fn, datagen, mb_size=20):
     """ Validation routine for speech-models
     Params:
         model (keras.model): Constructed keras model
@@ -48,7 +48,7 @@ def validation(model, val_fn, datagen, mb_size=16):
     return avg_cost / i
 
 
-def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=16,
+def train(model, train_fn, val_fn, datagen, save_dir, epochs=10, mb_size=2,
           do_sortagrad=True):
     """ Main training routine for speech-models
     Params:

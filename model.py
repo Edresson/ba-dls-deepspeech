@@ -45,6 +45,7 @@ def compile_train_fn(model, learning_rate=2e-4):
     grads = lasagne.updates.total_norm_constraint(grads, 100)
     updates = lasagne.updates.nesterov_momentum(grads, trainable_vars,
                                                 learning_rate, 0.99)
+    print("ok ate aqui")
     train_fn = K.function([acoustic_input, output_lens, label, label_lens,
                            K.learning_phase()],
                           [network_output, ctc_cost],
@@ -108,7 +109,7 @@ def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,
                             subsample_length=conv_stride, init=initialization,
                             activation='relu')(acoustic_input)
     if batch_norm:
-        output = BatchNormalization(name='bn_conv_1d', mode=2)(conv_1d)
+        output = BatchNormalization(name='bn_conv_1d',mode=2)(conv_1d)
     else:
         output = conv_1d
 
@@ -117,8 +118,7 @@ def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,
                      name='rnn_{}'.format(r + 1), init=initialization,
                      return_sequences=True)(output)
         if batch_norm:
-            bn_layer = BatchNormalization(name='bn_rnn_{}'.format(r + 1),
-                                          mode=2)
+            bn_layer = BatchNormalization(name='bn_rnn_{}'.format(r + 1),mode=2)#
             output = bn_layer(output)
 
     # We don't softmax here because CTC does that
@@ -126,6 +126,7 @@ def compile_gru_model(input_dim=161, output_dim=29, recur_layers=3, nodes=1024,
         output_dim, name='dense', activation='linear', init=initialization,
     ))(output)
     model = Model(input=acoustic_input, output=network_output)
+    model.summary()
     model.conv_output_length = lambda x: conv_output_length(
         x, conv_context, conv_border_mode, conv_stride)
     return model

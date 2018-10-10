@@ -10,29 +10,49 @@ Train your own CTC model!  This code was released with the lecture from the [Bay
 You will need the following packages installed before you can train a model using this code. You may have to change `PYTHONPATH` to include the directories
 of your new packages.  
   
-**theano**  
-The underlying deep learning Python library. We suggest downloading version 0.8.2 from https://github.com/Theano/Theano/releases.    
-```bash
-$tar xf <downloaded_tar_file>
-$cd theano-*
-$python setup.py install --user
-```  
-or
+For using GPU,instalation working on Ubuntu 16.04:
+**CUDA**
+Download and install cuda 8.0.
+Download the "deb" (network) of cuda 8.0 in https://developer.nvidia.com/cuda-80-ga2-download-archive
+open a terminal in the directory that downloaded the file and run: 
 ```
-pip install 'theano==0.8.2'
-``` 
+sudo dpkg -i cuda-repo-ubuntu1604_8.0.61-1_amd64.deb
+sudo apt-get update
+sudo apt-get install cuda-8-0 cuda-toolkit-8.0
+```
+in the ~/.bashrc file add:
+```
+export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}$ 
+export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
-**keras**  
-This is a wrapper over Theano that provides nice functions for building networks. Download version 1.1.2 from https://github.com/fchollet/keras/releases  
-Make sure you install it with support for `hdf5` - we make use of that to save models.  
-```bash
-$tar xf <downloaded_tar_file>
-$cd keras-*
-$python setup.py install --user
-```  
-or
 ```
-pip install 'keras==1.1.2'
+
+**cuDNN** 
+Go to: NVIDIA cuDNN home page: https://developer.nvidia.com/cudnn
+Click Download.
+Complete the short survey and click Submit.
+Accept the Terms and Conditions. A list of available download versions of cuDNN displays 
+Click in Archived cuDNN Releases.
+Click in Download cuDNN v7.1.3 (April 17, 2018), for CUDA 8.0.
+Click in cuDNN v7.1.3 Library for Linux, and save the cudnn-8.0-linux-x64-v7.1.tgz file.
+Extract cudnn-8.0-linux-x64-v7.1.tgz
+Open a terminal in the location where you extracted the files.
+Execute in terminal: 
+```
+sudo cp cuda/include/cudnn.h /usr/local/cuda-8.0/include
+sudo cp cuda/lib64/libcudnn* /usr/local/cuda-8.0/lib64
+sudo chmod a+r /usr/local/cuda-8.0/include/cudnn.h /usr/local/cuda-8.0/lib64/libcudnn*
+
+```
+**theano,keras,lasagne,scipy,**  
+Install Anaconda see instructions in https://conda.io/docs/user-guide/install/linux.html . 
+
+clone this repository.
+
+open a terminal in the repository directory and type:
+```conda env create -f conda-env-ba-deepspeech.yml```
+
+
 ``` 
 
 Update the keras.json to use Theano backend:
@@ -45,21 +65,18 @@ Update the backend property
 "backend": "theano"
 ```
 
-**lasagne**  
-```
-$pip install lasagne <--user>
-```
-
-**scipy**
-Scipy needs to be version 0.18.1
-```
-pip install 'scipy==0.18.1'
-``` 
-
 **warp-ctc**  
 This contains the main implementation of the CTC cost function.  
+if you find gcc errors in the compilation, I recommend compiling with gcc and g ++ 6 or 7, if you have errors requesting a gcc version of less than 5, disable support for gpu from warp ctc, the same goes for the next request theano-warp-ctc:
+
+in CMakeLists.txt add after FIND_PACKAGE(CUDA 6.5) this:
+```
+set(CUDA_FOUND FALSE)
+```
+
 <code>git clone https://github.com/baidu-research/warp-ctc</code>  
 To install it, follow the instructions on https://github.com/baidu-research/warp-ctc
+
 
 **theano-warp-ctc**  
 This is a theano wrapper over warp-ctc.  
@@ -67,8 +84,7 @@ This is a theano wrapper over warp-ctc.
 Follow the instructions on https://github.com/sherjilozair/ctc for installation.
 
 **Others**  
-You may require some additional packages. Install Python requirements through `pip` as:  
-<code>pip install soundfile</code>  
+You may require some additional packages. 
 On Ubuntu, `avconv` (used here for audio format conversions) requires `libav-tools`.  
 <code>sudo apt-get install libav-tools</code>  
 ## Data
